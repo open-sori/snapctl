@@ -1,0 +1,34 @@
+{
+  "branches": [
+    "main"
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "CHANGELOG.md",
+          "Cargo.toml",
+          "docs/package.json"
+        ],
+        "message": "chore(release): v${nextRelease.version} [skip ci] semantic-release update CHANGELOG.md, Cargo.toml and docs/package.json"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          "builds/**/*"
+        ]
+      }
+    ]
+  ]
+}

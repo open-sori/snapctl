@@ -11,6 +11,7 @@ A command-line utility for controlling and monitoring Snapcast servers and clien
   - [Get Commands](#get-commands)
   - [Set Commands](#set-commands)
   - [Delete Commands](#delete-commands)
+  - [Version Command](#version-command)
 - [Configuration](#configuration)
 - [Environment Variables](#environment-variables)
 - [Examples](#examples)
@@ -50,7 +51,6 @@ snapctl [OPTIONS] <COMMAND>
 
 Get information about various Snapcast components:
 
-- `get server`: Get information about the server
 - `get streams`: Get information about all streams
 - `get stream <STREAM_ID>`: Get information about a specific stream
 - `get groups`: Get information about all groups
@@ -84,6 +84,12 @@ Delete Snapcast resources:
 - `delete client <CLIENT_ID>`: Delete a client
 - `delete clients <CLIENT_IDS>`: Delete multiple clients (comma-separated list)
 
+### Version Command
+
+Display the version of the `snapctl` utility:
+
+- `version`: Show the current version of the application.
+
 ## Configuration
 
 The utility can be configured using a YAML configuration file located at `~/.config/snapctl/config.yaml`.
@@ -96,12 +102,6 @@ You can set the following environment variables:
 - `SNAPSERVER_PORT`: Default port number (default: 1780)
 
 ## Examples
-
-Get server information:
-
-```bash
-snapctl get server
-```
 
 Get information about all clients:
 
@@ -131,6 +131,12 @@ Using a custom host and port:
 
 ```bash
 snapctl -H 192.168.1.100 -p 1781 get streams
+```
+
+Display the version:
+
+```bash
+snapctl version
 ```
 
 ## Testing

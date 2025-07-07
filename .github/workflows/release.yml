@@ -1,0 +1,134 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/**
+      - Cargo.toml
+
+concurrency:
+  group: ${{ github.workflow }}
+
+permissions:
+  contents: read
+
+jobs:
+
+  init:
+    name: Init
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install semantic-release and plugins
+        run: npm install -g semantic-release @semantic-release/github @semantic-release/git @semantic-release/changelog
+      - name: Get next version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "NEXT_VERSION=$(semantic-release --dry-run | grep "Release note for version" |sed -n 's/.*Release note for version \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')" >> $GITHUB_ENV
+      - name: Update Cargo.toml
+        run: |
+          sed -i'' -e "s/^version = .*/version = \"${{ env.NEXT_VERSION }}\"/" Cargo.toml
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cargo_toml
+          path: Cargo.toml
+
+  build:
+    name: Build
+    needs: init
+    strategy:
+      matrix:
+        platform:
+          - runs-on: macos-latest
+            target: x86_64-apple-darwin
+          - runs-on: macos-latest
+            target: aarch64-apple-darwin
+          - runs-on: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+          - runs-on: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - runs-on: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+          - runs-on: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - runs-on: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.platform.runs-on }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: cargo_toml
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v1
+        with:
+          command: build
+          target: ${{ matrix.platform.target }}
+          args: "--release"
+          strip: true
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapctl-${{ matrix.platform.target }}
+          path: |
+            target/${{ matrix.platform.target }}/release/snapctl
+            target/${{ matrix.platform.target }}/release/snapctl.exe
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: cargo_toml
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install semantic-release and plugins
+        run: npm install -g semantic-release @semantic-release/github @semantic-release/git @semantic-release/changelog
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: builds
+          pattern: snapctl-*
+          merge-multiple: false
+      - name: Rename binaries
+        run: |
+          for file in builds/*-*; do
+            if [[ -f "$file/snapctl" ]]; then
+              mv "$file/snapctl" "$file/$(basename "$file")"
+            elif [[ -f "$file/snapctl.exe" ]]; then
+              mv "$file/snapctl.exe" "$file/$(basename "$file").exe"
+            fi
+          done
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: semantic-release

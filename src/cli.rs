@@ -22,13 +22,9 @@ pub struct Cli {
 /// Enum representing the available commands.
 #[derive(Subcommand, Debug)]
 pub enum Command {
-
     Get(GetArgs),
-
     Set(SetArgs),
-
     Delete(DeleteArgs),
-
     Version,
 }
 
@@ -45,34 +41,14 @@ pub struct GetArgs {
 /// Enum representing the available subcommands for the 'get' command.
 #[derive(Subcommand, Debug)]
 pub enum GetSubcommand {
-
-    Server,
-
+    
     Streams,
-
-
-
-
-
-
     Stream { stream_id: String },
     Groups,
-
-
-
-
-
-
     Group { identifier: String },
     Clients,
-
-
-
-
-
     Client { client_id: String },
 }
-
 
 /// Arguments for the 'set' command.
 #[derive(Parser, Debug)]
@@ -82,13 +58,11 @@ pub struct SetArgs {
     pub subcommand: SetSubcommand,
 }
 
-
 /// Enum representing the available subcommands for the 'set' command.
 #[derive(Subcommand, Debug)]
 pub enum SetSubcommand {
 
     Client {
-
         client_id: String,
 
         #[clap(long)]
@@ -138,16 +112,6 @@ pub struct DeleteArgs {
 /// Enum representing the available subcommands for the 'delete' command.
 #[derive(Subcommand, Debug)]
 pub enum DeleteSubcommand {
-
-
-
-
-
-
-
-
-
-
     Client { client_id: String },
     Clients { client_ids: String },
 }

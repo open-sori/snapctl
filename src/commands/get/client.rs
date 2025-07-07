@@ -1,4 +1,5 @@
 use crate::rpc::client::SnapcastRpcClient;
+use crate::utils::display::print_table;
 use anyhow::{Result, Context};
 use serde_json::Value;
 
@@ -14,7 +15,7 @@ pub async fn get_client(server_url: &str, client_id: &str) -> Result<()> {
         })?;
 
     // Extract client information
-    let client_id = client_data.get("id")
+    let client_id_str = client_data.get("id")
         .and_then(|id| id.as_str())
         .unwrap_or("unknown");
 
@@ -65,28 +66,24 @@ pub async fn get_client(server_url: &str, client_id: &str) -> Result<()> {
         .unwrap_or_else(|| "unknown".to_string());
 
     // Find the group and stream information for this client
-    let (group_id, stream_id) = find_group_and_stream_for_client(&server_info, client_id);
+    let (group_id, stream_id) = find_group_and_stream_for_client(&server_info, client_id_str);
 
-    // Print header with GROUP ID and STREAM ID added at the end
-    println!("{:<12} {:<12} {:<12} {:<12} {:<12} {:<18} {:<8} {:<8} {:<8} {:<36} {:<12}",
-        "CLIENT ID", "STATUS", "INSTANCE", "NAME", "IP", "MAC", "VERSION", "MUTED", "VOLUME", "GROUP ID", "STREAM ID");
-
-    // Print client information with GROUP ID and STREAM ID added at the end
-    println!("{:<12} {:<12} {:<12} {:<12} {:<12} {:<18} {:<8} {:<8} {:<8} {:<36} {:<12}",
-        client_id,
-        status,
+    let headers = vec!["CLIENT ID", "STATUS", "INSTANCE", "NAME", "IP", "MAC", "VERSION", "MUTED", "VOLUME", "GROUP ID", "STREAM ID"];
+    let data = vec![vec![
+        client_id_str.to_string(),
+        status.to_string(),
         instance,
-        name,
-        client_data.get("host")
-            .and_then(|h| h.get("ip"))
-            .and_then(|ip| ip.as_str())
-            .unwrap_or("unknown"),
-        mac,
-        version,
-        if muted { "true" } else { "false" },
+        name.to_string(),
+        client_data.get("host").and_then(|h| h.get("ip")).and_then(|ip| ip.as_str()).unwrap_or("unknown").to_string(),
+        mac.to_string(),
+        version.to_string(),
+        if muted { "true" } else { "false" }.to_string(),
         volume,
         group_id,
-        stream_id);
+        stream_id,
+    ]];
+
+    print_table(headers, data);
 
     Ok(())
 }

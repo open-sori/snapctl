@@ -1,4 +1,5 @@
 use crate::rpc::client::SnapcastRpcClient;
+use crate::utils::display::print_table;
 use anyhow::{Result, anyhow};
 use serde_json::json;
 use uuid::Uuid;
@@ -18,7 +19,6 @@ pub async fn set_client(
     let mut group_id = String::from("N/A");
     let mut stream_id = String::from("N/A");
     let mut group_name = String::from("N/A");
-    let group_used = group.is_some(); // Store whether group was used
 
     // Check if client exists before making any changes
     let client_status_message = json!({
@@ -300,6 +300,26 @@ pub async fn set_client(
         }
     }
 
+    // Always get group info for final output
+    if let Some(current_group_id) = find_client_group(&client, client_id).await? {
+        let group_status_message = json!({
+            "id": Uuid::new_v4().to_string(),
+            "jsonrpc": "2.0",
+            "method": "Group.GetStatus",
+            "params": {
+                "id": &current_group_id
+            }
+        });
+
+        let group_status_response = client.send_rpc_message(group_status_message).await?;
+
+        if let Some(group_info) = group_status_response.get("result").and_then(|r| r.get("group")) {
+            group_id = group_info.get("id").and_then(|id| id.as_str()).unwrap_or(&current_group_id).to_string();
+            group_name = group_info.get("name").and_then(|n| n.as_str()).unwrap_or("N/A").to_string();
+            stream_id = group_info.get("stream_id").and_then(|s| s.as_str()).unwrap_or("N/A").to_string();
+        }
+    }
+
     // Get client status after making changes
     let client_status_message = json!({
         "id": Uuid::new_v4().to_string(),
@@ -329,7 +349,7 @@ pub async fn set_client(
         .and_then(|r| r.get("client"))
         .ok_or_else(|| anyhow::anyhow!("Failed to get client data"))?;
 
-    let client_id = client_data.get("id")
+    let client_id_str = client_data.get("id")
         .and_then(|id| id.as_str())
         .unwrap_or("unknown");
 
@@ -389,39 +409,24 @@ pub async fn set_client(
         .map(|l| l.to_string())
         .unwrap_or_else(|| "unknown".to_string());
 
-    // Print the output with the relevant information
-    if group_used {
-        println!("{:<10} {:<10} {:<10} {:<10} {:<10} {:<18} {:<10} {:<10} {:<10} {:<10} {:<36} {:<10} {:<10}",
-            "CLIENT ID", "STATUS", "INSTANCE", "NAME", "IP", "MAC", "VERSION", "MUTED", "VOLUME", "LATENCY", "GROUP ID", "GROUP NAME", "STREAM ID");
-        println!("{:<10} {:<10} {:<10} {:<10} {:<10} {:<18} {:<10} {:<10} {:<10} {:<10} {:<36} {:<10} {:<10}",
-            client_id,
-            status,
-            instance,
-            name,
-            ip,
-            mac,
-            version,
-            if muted { "true" } else { "false" },
-            volume,
-            latency_value,
-            group_id,
-            group_name,
-            stream_id);
-    } else {
-        println!("{:<10} {:<10} {:<10} {:<10} {:<10} {:<18} {:<10} {:<10} {:<10} {:<10}",
-            "CLIENT ID", "STATUS", "INSTANCE", "NAME", "IP", "MAC", "VERSION", "MUTED", "VOLUME", "LATENCY");
-        println!("{:<10} {:<10} {:<10} {:<10} {:<10} {:<18} {:<10} {:<10} {:<10} {:<10}",
-            client_id,
-            status,
-            instance,
-            name,
-            ip,
-            mac,
-            version,
-            if muted { "true" } else { "false" },
-            volume,
-            latency_value);
-    }
+    let headers = vec!["CLIENT ID", "STATUS", "INSTANCE", "NAME", "IP", "MAC", "VERSION", "MUTED", "VOLUME", "LATENCY", "GROUP ID", "GROUP NAME", "STREAM ID"];
+    let data = vec![vec![
+        client_id_str.to_string(),
+        status.to_string(),
+        instance,
+        name.to_string(),
+        ip.to_string(),
+        mac.to_string(),
+        version.to_string(),
+        if muted { "true" } else { "false" }.to_string(),
+        volume,
+        latency_value,
+        group_id,
+        group_name,
+        stream_id,
+    ]];
+
+    print_table(headers, data);
 
     Ok(())
 }

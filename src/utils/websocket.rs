@@ -10,7 +10,7 @@ pub async fn send_websocket_message(
     let (ws_stream, _) = connect_async(url).await?;
     let (mut write, mut read) = ws_stream.split();
 
-    write.send(Message::Text(message.to_string())).await?;
+    write.send(Message::Text(message.to_string().into())).await?;
 
     if let Some(msg) = read.next().await {
         match msg? {

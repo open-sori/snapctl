@@ -1,4 +1,5 @@
 use crate::rpc::client::SnapcastRpcClient;
+use crate::utils::display::print_table;
 use anyhow::{Result, Context};
 use serde_json::Value;
 
@@ -19,7 +20,7 @@ pub async fn get_stream(server_url: &str, stream_id: &str) -> Result<()> {
         })?;
 
     // Extract stream information
-    let stream_id = stream.get("id")
+    let stream_id_str = stream.get("id")
         .and_then(|id| id.as_str())
         .unwrap_or("unknown");
 
@@ -33,40 +34,59 @@ pub async fn get_stream(server_url: &str, stream_id: &str) -> Result<()> {
         .unwrap_or("unknown");
 
     // Find groups associated with this stream
-    let groups = find_groups_for_stream(&server_info, stream_id);
+    let groups = find_groups_for_stream(&server_info, stream_id_str);
 
-    // Print header with VERSION column
-    println!("{:<20} {:<15} {:<15} {:<40} {:<30} {:<40}",
-        "STREAM ID", "STATUS", "VERSION", "GROUP ID", "CLIENTS", "URI");
+    let headers = vec!["STREAM ID", "STATUS", "VERSION", "GROUP ID", "CLIENTS", "URI"];
+    let mut data = Vec::new();
 
     if groups.is_empty() {
         // If no groups found, print a single line with the stream info
-        println!("{:<20} {:<15} {:<15} {:<40} {:<30} {:<40}",
-            stream_id, status, version, "None", "None", uri);
+        data.push(vec![
+            stream_id_str.to_string(),
+            status.to_string(),
+            version.to_string(),
+            "None".to_string(),
+            "None".to_string(),
+            uri.to_string(),
+        ]);
     } else {
         // Print first row with all information including version
         let first_group = &groups[0];
         let first_group_id = first_group.get("id")
             .and_then(|id| id.as_str())
-            .unwrap_or("unknown");
+            .unwrap_or("unknown").to_string();
 
         let first_clients = get_client_ids(first_group);
 
-        println!("{:<20} {:<15} {:<15} {:<40} {:<30} {:<40}",
-            stream_id, status, version, first_group_id, first_clients, uri);
+        data.push(vec![
+            stream_id_str.to_string(),
+            status.to_string(),
+            version.to_string(),
+            first_group_id,
+            first_clients,
+            uri.to_string(),
+        ]);
 
         // Print subsequent rows with only group ID, clients, and URI
         for group in groups.iter().skip(1) {
             let group_id = group.get("id")
                 .and_then(|id| id.as_str())
-                .unwrap_or("unknown");
+                .unwrap_or("unknown").to_string();
 
             let clients = get_client_ids(group);
 
-            println!("{:<20} {:<15} {:<15} {:<40} {:<30} {:<40}",
-                "", "", "", group_id, clients, uri);
+            data.push(vec![
+                "".to_string(),
+                "".to_string(),
+                "".to_string(),
+                group_id,
+                clients,
+                uri.to_string(),
+            ]);
         }
     }
+
+    print_table(headers, data);
 
     Ok(())
 }

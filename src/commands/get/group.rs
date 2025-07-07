@@ -1,4 +1,5 @@
 use crate::rpc::client::SnapcastRpcClient;
+use crate::utils::display::print_table;
 use anyhow::{Result, Context};
 use serde_json::Value;
 
@@ -47,13 +48,17 @@ pub async fn get_group(server_url: &str, identifier: &str) -> Result<()> {
         })
         .unwrap_or_else(|| "None".to_string());
 
-    // Print header with VERSION column after NAME
-    println!("{:<36} {:<20} {:<15} {:<10} {:<20} {:<40}",
-        "GROUP ID", "NAME", "VERSION", "STATUS", "STREAM ID", "CLIENTS");
+    let headers = vec!["GROUP ID", "NAME", "VERSION", "STATUS", "STREAM ID", "CLIENTS"];
+    let data = vec![vec![
+        group_id.to_string(),
+        name.to_string(),
+        version.to_string(),
+        status.to_string(),
+        stream_id.to_string(),
+        clients,
+    ]];
 
-    // Print group information with version after name
-    println!("{:<36} {:<20} {:<15} {:<10} {:<20} {:<40}",
-        group_id, name, version, status, stream_id, clients);
+    print_table(headers, data);
 
     Ok(())
 }

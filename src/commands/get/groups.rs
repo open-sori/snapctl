@@ -1,13 +1,13 @@
 use crate::rpc::client::SnapcastRpcClient;
+use crate::utils::display::print_table;
 use anyhow::Result;
 
 pub async fn get_groups(server_url: &str) -> Result<()> {
     let client = SnapcastRpcClient::new(server_url);
     let server_info = client.get_status().await?;
 
-    // Print header
-    println!("{:<36} {:<20} {:<10} {:<20} {:<40}",
-        "GROUP ID", "NAME", "STATUS", "STREAM ID", "CLIENTS");
+    let headers = vec!["GROUP ID", "NAME", "STATUS", "STREAM ID", "CLIENTS"];
+    let mut data = Vec::new();
 
     // Get groups array
     let groups = if let Some(groups) = server_info.get("groups").and_then(|g| g.as_array()) {
@@ -26,12 +26,12 @@ pub async fn get_groups(server_url: &str) -> Result<()> {
     for group in groups {
         let group_id = group.get("id")
             .and_then(|id| id.as_str())
-            .unwrap_or("unknown");
+            .unwrap_or("unknown").to_string();
 
         // Show empty string for undefined names instead of "undefined"
         let name = group.get("name")
             .and_then(|n| n.as_str())
-            .unwrap_or("");
+            .unwrap_or("").to_string();
 
         let muted = group.get("muted")
             .and_then(|m| m.as_bool())
@@ -41,7 +41,7 @@ pub async fn get_groups(server_url: &str) -> Result<()> {
 
         let stream_id = group.get("stream_id")
             .and_then(|id| id.as_str())
-            .unwrap_or("none");
+            .unwrap_or("none").to_string();
 
         let clients = group.get("clients")
             .and_then(|c| c.as_array())
@@ -53,9 +53,10 @@ pub async fn get_groups(server_url: &str) -> Result<()> {
             })
             .unwrap_or_else(|| "None".to_string());
 
-        println!("{:<36} {:<20} {:<10} {:<20} {:<40}",
-            group_id, name, status, stream_id, clients);
+        data.push(vec![group_id, name, status.to_string(), stream_id, clients]);
     }
+
+    print_table(headers, data);
 
     Ok(())
 }

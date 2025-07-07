@@ -1,4 +1,5 @@
 use crate::rpc::client::SnapcastRpcClient;
+use crate::utils::display::print_table;
 use anyhow::{Result, anyhow};
 use serde_json::json;
 use uuid::Uuid;
@@ -221,20 +222,20 @@ pub async fn set_group(
         return Ok(());
     }
 
-    // Print the final status with client information
-    println!("{:<36} {:<12} {:<8} {:<18} {:<20}",
-        "GROUP ID", "NAME", "MUTED", "STREAM ID", "CLIENTS");
-    println!("{:<36} {:<12} {:<8} {:<18} {:<20}",
-        group_id,
-        final_name.as_deref().unwrap_or("unknown"),
+    let headers = vec!["GROUP ID", "NAME", "MUTED", "STREAM ID", "CLIENTS"];
+    let data = vec![vec![
+        group_id.to_string(),
+        final_name.as_deref().unwrap_or("unknown").to_string(),
         match final_muted {
             Some(true) => "true",
             Some(false) => "false",
             None => "unknown"
-        },
-        final_stream_id.as_deref().unwrap_or("none"),
-        final_clients.join(", ")
-    );
+        }.to_string(),
+        final_stream_id.as_deref().unwrap_or("none").to_string(),
+        final_clients.join(", "),
+    ]];
+
+    print_table(headers, data);
 
     Ok(())
 }

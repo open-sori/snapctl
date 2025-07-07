@@ -39,9 +39,7 @@ async fn handle_get_command(server_url: &str, args: cli::GetArgs) -> Result<()> 
         cli::GetSubcommand::Client { client_id } => {
             commands::get::client::get_client(server_url, &client_id).await?;
         }
-        cli::GetSubcommand::Server => {
-            commands::get::server::get_server(server_url).await?;
-        }
+        
         cli::GetSubcommand::Streams => {
             commands::get::streams::get_streams(server_url).await?;
         }

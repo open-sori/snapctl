@@ -12,7 +12,7 @@ on:
       - docs/package.json
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.ref }}
 
 permissions:
   contents: read

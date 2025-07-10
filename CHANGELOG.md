@@ -7,6 +7,24 @@
 * **ci:** test new docker pipeline ([480f54e](https://github.com/open-sori/snapctl/commit/480f54e20aa19b1e6ecaacb1d0c3fd17a5cdce5f))
 * deploy the first snapctl version ([64dd576](https://github.com/open-sori/snapctl/commit/64dd576db717b358721537be977fe7fe39f40af3))
 * minor changes and docs ([594753e](https://github.com/open-sori/snapctl/commit/594753ec3e6f2d9fde9a2a01ccb82f29af7cb511))
+* test ([e83757f](https://github.com/open-sori/snapctl/commit/e83757f2918af0e7c23d917dd385cfeb0f07511d))
+* test ([609a866](https://github.com/open-sori/snapctl/commit/609a86667ee72da19e1cac03478ec594fffa9e4b))
+* test ([efd8031](https://github.com/open-sori/snapctl/commit/efd8031166c0ddbe69bf3fa273bef29aff9c7397))
+* test ([09b667f](https://github.com/open-sori/snapctl/commit/09b667f251e219ee5018a547e8f3f3560f35b988))
+* test ([27eb15f](https://github.com/open-sori/snapctl/commit/27eb15f350a8054a72abf5b874c4aadee76c8b6c))
+* test ([eab6b2f](https://github.com/open-sori/snapctl/commit/eab6b2facc2845d7c5fa0a4cd8fc60b70da0f0ba))
+* test ([288502a](https://github.com/open-sori/snapctl/commit/288502a27cd4ee616fbc9265d7fd67033db4712d))
+* test ([c1be8c7](https://github.com/open-sori/snapctl/commit/c1be8c7e2a7e2e16789ee76c1f48e05ee3463c75))
+
+# 1.0.0 (2025-07-10)
+
+
+### Features
+
+* **ci:** a fake commit to confirm docs pipeline ([411c56f](https://github.com/open-sori/snapctl/commit/411c56fab5f83c1b0fd9f9aa3cb12a9e5c61676d))
+* **ci:** test new docker pipeline ([480f54e](https://github.com/open-sori/snapctl/commit/480f54e20aa19b1e6ecaacb1d0c3fd17a5cdce5f))
+* deploy the first snapctl version ([64dd576](https://github.com/open-sori/snapctl/commit/64dd576db717b358721537be977fe7fe39f40af3))
+* minor changes and docs ([594753e](https://github.com/open-sori/snapctl/commit/594753ec3e6f2d9fde9a2a01ccb82f29af7cb511))
 * test ([eab6b2f](https://github.com/open-sori/snapctl/commit/eab6b2facc2845d7c5fa0a4cd8fc60b70da0f0ba))
 * test ([288502a](https://github.com/open-sori/snapctl/commit/288502a27cd4ee616fbc9265d7fd67033db4712d))
 * test ([c1be8c7](https://github.com/open-sori/snapctl/commit/c1be8c7e2a7e2e16789ee76c1f48e05ee3463c75))

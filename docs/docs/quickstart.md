@@ -28,6 +28,17 @@ To build `snapctl` from source, you need to have [Rust](https://www.rust-lang.or
     cargo build --release
     ```
 
+## Docker Image
+
+You can also use the `snapctl` Docker image.
+
+### Manualy build the image
+
+```bash
+docker build --build-arg SNAPCTL_VERSION=v1.0.0 --build-arg SNAPCTL_ARCH=aarch64-unknown-linux-musl --build-arg CREATED_DATE=$(date +%Y-%m-%d) -t snapctl .
+docker run --rm snapctl --version
+```
+
 ## Usage
 
 After building, you can run `snapctl` from the `target/release` directory:

@@ -18,6 +18,7 @@ A command-line utility for controlling and monitoring Snapcast servers and clien
 - [Testing](#testing)
 - [Building from Source](#building-from-source)
 - [Building the Binary](#building-the-binary)
+- [Building the Container Image](#Building-the-container-image)
 
 ## Features
 
@@ -201,3 +202,31 @@ cargo build --release
 ```
 
 3. The final binary will be in the `target/release` directory.
+
+## Building the Container Image
+
+### Test with an alpine image
+
+```bash
+docker run -it --rm docker.io/alpine:3.22 /bin/ash
+apk add --update curl
+SNAPCTL_VERSION="v1.0.0"
+SNAPCTL_ARCH="aarch64-unknown-linux-musl"
+cd /tmp
+curl --location --remote-name-all --request GET "https://github.com/open-sori/snapctl/releases/download/${SNAPCTL_VERSION}/snapctl-${SNAPCTL_ARCH}"
+chmod +x /tmp/snapctl
+mv /tmp/snapctl /usr/local/bin/snapctl
+snapctl --version
+```
+
+### Manualy build the image
+
+```bash
+docker build --build-arg SNAPCTL_VERSION=v1.0.0 --build-arg SNAPCTL_ARCH=aarch64-unknown-linux-musl --build-arg CREATED_DATE=$(date +%Y-%m-%d) -t snapctl .
+docker run --rm snapctl --version
+export GHCR_PAT="YOUR_TOKEN"
+echo $GHCR_PAT | docker login ghcr.io -u tdesaules --password-stdin
+docker image tag snapctl:latest ghcr.io/open-sori/snapctl:v0.0.1
+docker push ghcr.io/open-sori/snapctl:v0.0.1
+docker pull ghcr.io/open-sori/snapctl:v0.0.1
+```

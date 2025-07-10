@@ -7,14 +7,8 @@ on:
     paths:
       - src/**
       - Cargo.toml
-      - docs/docs/**
-      - docs/src/**
-      - docs/static/**
-      - docs/docusaurus.config.ts
+      - docs/**
       - docs/package.json
-
-concurrency:
-  group: ${{ github.ref }}
 
 permissions:
   contents: read

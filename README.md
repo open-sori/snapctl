@@ -226,7 +226,7 @@ docker build --build-arg SNAPCTL_VERSION=v1.0.0 --build-arg SNAPCTL_ARCH=aarch64
 docker run --rm snapctl --version
 export GHCR_PAT="YOUR_TOKEN"
 echo $GHCR_PAT | docker login ghcr.io -u tdesaules --password-stdin
-docker image tag snapctl:latest ghcr.io/open-sori/snapctl:v0.0.1
-docker push ghcr.io/open-sori/snapctl:v0.0.1
-docker pull ghcr.io/open-sori/snapctl:v0.0.1
+docker image tag snapctl:latest ghcr.io/open-sori/snapctl:v1.0.0
+docker push ghcr.io/open-sori/snapctl:v1.0.0
+docker pull ghcr.io/open-sori/snapctl:v1.0.0
 ```

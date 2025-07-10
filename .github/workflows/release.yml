@@ -38,8 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          semantic-release --dry-run
-          echo "version=$(semantic-release --dry-run | grep "Release note for version" | sed -n 's/.*Release note for version v\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')" >> $GITHUB_OUTPUT
+          echo "version=v$(semantic-release --dry-run | grep "Release note for version" | sed -n 's/.*Release note for version \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')"
+          echo "version=v$(semantic-release --dry-run | grep "Release note for version" | sed -n 's/.*Release note for version \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')" >> $GITHUB_OUTPUT
       - name: Update Cargo.toml
         run: |
           sed -i'' -e "s/^version = .*/version = \"${{ steps.get_version.outputs.version }}\"/" Cargo.toml

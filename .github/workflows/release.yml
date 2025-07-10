@@ -7,6 +7,11 @@ on:
     paths:
       - src/**
       - Cargo.toml
+      - docs/docs/**
+      - docs/src/**
+      - docs/static/**
+      - docs/docusaurus.config.ts
+      - docs/package.json
 
 concurrency:
   group: ${{ github.ref }}
@@ -40,11 +45,18 @@ jobs:
       - name: Update Cargo.toml
         run: |
           sed -i'' -e "s/^version = .*/version = \"${{ env.NEXT_VERSION }}\"/" Cargo.toml
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Update package.json
+        run: |
+          sed -i'' -e "s/\"version\": \".*\"/\"version\": \"${{ env.NEXT_VERSION }}\"/" package.json
+        working-directory: docs
+      - uses: actions/upload-artifact@v4
         with:
           name: cargo_toml
           path: Cargo.toml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package_json
+          path: docs/package.json
 
   build:
     name: Build
@@ -91,12 +103,10 @@ jobs:
             target/${{ matrix.platform.target }}/release/snapctl
             target/${{ matrix.platform.target }}/release/snapctl.exe
 
-  release:
-    name: release
+  docs:
+    name: Docs
+    needs: init
     runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -105,13 +115,53 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          name: cargo_toml
+          name: package_json
+          path: docs/
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Docusaurus dependencies
+        run: npm install
+        working-directory: docs
+      - name: Build Docusaurus site
+        run: npm run build
+        working-directory: docs
+      - name: Upload Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build/
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    needs: [build, docs]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
+      id-token: write
+      pages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
       - name: Install semantic-release and plugins
         run: npm install -g semantic-release @semantic-release/github @semantic-release/git @semantic-release/changelog
+      - uses: actions/download-artifact@v4
+        with:
+          name: cargo_toml
+      - uses: actions/download-artifact@v4
+        with:
+          name: package_json
+          path: docs/
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -127,6 +177,9 @@ jobs:
               mv "$file/snapctl.exe" "$file/$(basename "$file").exe"
             fi
           done
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

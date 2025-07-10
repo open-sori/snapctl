@@ -3,6 +3,8 @@ FROM docker.io/alpine:3.22 AS builder
 ARG SNAPCTL_VERSION
 ARG TARGETARCH
 
+RUN echo "arch is ${TARGETARCH}"
+
 RUN apk add --update --no-cache curl && \
     case ${TARGETARCH} in \
         "amd64") export ARCH_SUFFIX="x86_64-unknown-linux-musl" ;; \

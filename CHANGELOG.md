@@ -3,6 +3,13 @@
 
 ### Features
 
+* initial commit ([df6e00b](https://github.com/open-sori/snapctl/commit/df6e00bde6cffa489557b0839364dca5d4b38741))
+
+# 1.0.0 (2025-07-20)
+
+
+### Features
+
 * initial commit ([839e3f5](https://github.com/open-sori/snapctl/commit/839e3f58edf2ccf1bfa6b2353d2a69a5bc455bc9))
 
 # 1.0.0 (2025-07-20)
